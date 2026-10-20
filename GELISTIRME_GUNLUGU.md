@@ -70,3 +70,13 @@ Bu belge, proje boyunca tamamlanan aşamaları, çalıştırılan komutları, al
 1. `reportlab` entegrasyonu ile otomatik PDF kalite raporu oluşturucu yazıldı (`src/ahsapguard/raporlama/pdf_ureteci.py`).
 2. Analiz geçmişini JSON veritabanında saklayan ve CSV formatında indirme sunan modül geliştirildi (`gecmis_yonetici.py`).
 3. Streamlit arayüzü sekmeli yapıya dönüştürüldü ve sürüm uyarıları temizlendi.
+
+## [Aşama 6 & 7] --- Otomatik Testler, Dokümantasyon ve Final
+
+- **Tarih:** 2026-10-20
+- **Durum:** Tamamlandı (%100)
+
+### Yapılan İşlemler
+1. `pytest` ile birim testler yazıldı ve başarıyla doğrulandı.
+2. `docs/SUNUM_REHBERI.md` hazırlanarak proje sunumu ve portföy özeti belgelendi.
+3. Tüm kodlar, belgeler ve bağımlılıklar tamamlanarak GitHub ortamına aktarıldı.
