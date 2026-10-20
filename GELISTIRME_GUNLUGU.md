@@ -38,3 +38,14 @@ Bu belge, proje boyunca tamamlanan aşamaları, çalıştırılan komutları, al
 2. `src/ahsapguard/goruntu/isleyici.py` modülü ile ImageNet uyumlu görüntü dönüşüm hattı kuruldu.
 3. `src/ahsapguard/model/patchcore.py` modülü ile PatchCore anomali tespit mimarisi yazıldı.
 4. Normal görsel (0.5389) ve kusurlu delik görseli (6.7080) skorları başarıyla elde edildi.
+
+## [Aşama 3] --- Görselleştirme ve Değerlendirme
+
+- **Tarih:** 2026-10-20
+- **Durum:** Tamamlandı
+
+### Yapılan İşlemler
+1. `src/ahsapguard/goruntu/gorsellestirici.py` modülü yazılarak OpenCV JET renk haritası ile anomali görselleştirmesi sağlandı.
+2. `src/ahsapguard/degerlendirme/degerlendirici.py` yazılarak test seti üzerinde toplu çıkarım ve AUROC hesabı yapıldı.
+3. Görüntü düzeyinde AUROC skoru 1.0000 olarak ölçüldü ve `ciktilar/` dizinine ısı haritaları aktarıldı.
+4. `docs/MODEL_DEGERLENDIRME.md` teknik dokümanı oluşturuldu.
