@@ -60,3 +60,13 @@ Bu belge, proje boyunca tamamlanan aşamaları, çalıştırılan komutları, al
 2. `app/arayuz.py` modülü geliştirilerek kullanıcı dostu kalite kontrol arayüzü sunuldu.
 3. Model yükleme süreci `@st.cache_resource` ile optimize edildi.
 4. `docs/KULLANIM_KILAVUZU.md` oluşturuldu.
+
+## [Aşama 5] --- Geçmiş, Dışa Aktarma ve Raporlama
+
+- **Tarih:** 2026-10-20
+- **Durum:** Tamamlandı
+
+### Yapılan İşlemler
+1. `reportlab` entegrasyonu ile otomatik PDF kalite raporu oluşturucu yazıldı (`src/ahsapguard/raporlama/pdf_ureteci.py`).
+2. Analiz geçmişini JSON veritabanında saklayan ve CSV formatında indirme sunan modül geliştirildi (`gecmis_yonetici.py`).
+3. Streamlit arayüzü sekmeli yapıya dönüştürüldü ve sürüm uyarıları temizlendi.

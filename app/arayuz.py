@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 
-# Proje kök dizinini Python modül arama yoluna ekle
+# Proje kök dizinini Python yoluna ekle
 KOK_DIZIN = Path(__file__).resolve().parent.parent
 if str(KOK_DIZIN) not in sys.path:
     sys.path.append(str(KOK_DIZIN))
@@ -10,13 +10,15 @@ import os
 import time
 import cv2
 import numpy as np
+import pandas as pd
 from PIL import Image
 import streamlit as st
 
 from src.ahsapguard.goruntu.gorsellestirici import isi_haritasi_olustur
 from src.ahsapguard.model.patchcore import PatchCoreModel
+from src.ahsapguard.raporlama.gecmis_yonetici import AnalizGecmisYonetici
+from src.ahsapguard.raporlama.pdf_ureteci import pdf_raporu_olustur
 
-# Sayfa Yapılandırması
 st.set_page_config(
     page_title="AhşapGuard AI --- Kalite Kontrol Sistemi",
     page_icon="🪵",
@@ -26,11 +28,12 @@ st.set_page_config(
 
 @st.cache_resource
 def modeli_yukle_ve_egit():
-    """Modeli bir kez yükler ve ön belleğe alır."""
     model = PatchCoreModel(coreset_orani=0.2)
     model.egit("veri/wood/train/good")
     return model
 
+
+gecmis_db = AnalizGecmisYonetici()
 
 st.title("🪵 AhşapGuard AI --- Endüstriyel Anomali Tespiti")
 st.markdown(
@@ -38,86 +41,110 @@ st.markdown(
 )
 st.divider()
 
-# Yan Menü (Sidebar)
-st.sidebar.header("⚙️ Ayarlar ve Bilgiler")
-karar_esigi = st.sidebar.slider(
-    "Karar Eşiği (Anomali Skoru)",
-    min_value=1.0,
-    max_value=10.0,
-    value=2.5,
-    step=0.1,
-    help="Bu eşiğin üzerindeki skorlar 'ANORMAL / KUSURLU' olarak sınıflandırılır.",
-)
+# Sekmeli Yapı
+sekme1, sekme2 = st.tabs(["🔍 Canlı Kalite Kontrol", "📜 Analiz Geçmişi & Raporlar"])
 
-st.sidebar.info(
-    "💡 **Skor Açıklaması:** Anomali skoru bir yüzde değildir. Modelin Memory Bank'teki kusursuz ahşap yama özniteliklerine olan mesafesini ifade eder."
-)
+with sekme1:
+    st.sidebar.header("⚙️ Ayarlar")
+    karar_esigi = st.sidebar.slider(
+        "Karar Eşiği (Anomali Skoru)", 1.0, 10.0, 2.5, 0.1
+    )
 
-# Model Eğitimi Yüklemesi
-with st.spinner("Model hazırlanıyor ve eğitiliyor..."):
-    model = modeli_yukle_ve_egit()
+    with st.spinner("Model yükleniyor..."):
+        model = modeli_yukle_ve_egit()
 
-st.success("✅ Model hazır! Analiz etmek istediğiniz ahşap görselini yükleyin.")
+    yuklenen_dosya = st.file_uploader(
+        "Görüntü Yükleyin (PNG, JPG)", type=["png", "jpg", "jpeg"]
+    )
 
-# Görüntü Yükleme Alanı
-yuklenen_dosya = st.file_uploader(
-    "Görüntü seçin veya sürükleyip bırakın (PNG, JPG, JPEG)",
-    type=["png", "jpg", "jpeg"],
-)
+    if yuklenen_dosya is not None:
+        gecici_dizin = Path("ciktilar/gecici")
+        gecici_dizin.mkdir(parents=True, exist_ok=True)
+        gecici_yol = gecici_dizin / yuklenen_dosya.name
 
-if yuklenen_dosya is not None:
-    # Geçici kaydetme
-    gecici_dizin = Path("ciktilar/gecici")
-    gecici_dizin.mkdir(parents=True, exist_ok=True)
-    gecici_yol = gecici_dizin / yuklenen_dosya.name
+        with open(gecici_yol, "wb") as f:
+            f.write(yuklenen_dosya.getbuffer())
 
-    with open(gecici_yol, "wb") as f:
-        f.write(yuklenen_dosya.getbuffer())
+        dosya_stem = Path(yuklenen_dosya.name).stem
 
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image(
+                Image.open(gecici_yol),
+                use_container_width=True,
+                caption="Orijinal Yüzey",
+            )
 
-    with col1:
-        st.subheader("🖼️ Yüklenen Orijinal Görüntü")
-        st.image(
-            Image.open(gecici_yol),
-            use_column_width=True,
-            caption=f"Dosya: {yuklenen_dosya.name}",
-        )
-
-    if st.button("🔍 Analizi Başlat", type="primary"):
-        baslangic = time.time()
-        with st.spinner("Yüzey taranıyor ve anomali haritası çıkarılıyor..."):
+        if st.button("🔍 Analizi Başlat", type="primary"):
+            baslangic = time.time()
             sonuc = model.tahmin_et(str(gecici_yol))
             sure = time.time() - baslangic
 
             skor = sonuc["anomali_skoru"]
             harita = sonuc["anomali_haritasi"]
 
-            isi_haritasi_img = isi_haritasi_olustur(str(gecici_yol), harita)
-            # BGR -> RGB dönüşümü Streamlit için
+            isi_yolu = f"ciktilar/gecici/{dosya_stem}_heatmap.png"
+            isi_haritasi_img = isi_haritasi_olustur(
+                str(gecici_yol), harita, cikti_yolu=isi_yolu
+            )
             isi_haritasi_rgb = cv2.cvtColor(isi_haritasi_img, cv2.COLOR_BGR2RGB)
 
-        with col2:
-            st.subheader("🔥 Anomali Isı Haritası")
-            st.image(
-                isi_haritasi_rgb,
-                use_column_width=True,
-                caption="Kırmızı/Sarı bölgeler anomali yoğunluğunu gösterir.",
+            with col2:
+                st.image(
+                    isi_haritasi_rgb,
+                    use_container_width=True,
+                    caption="Anomali Isı Haritası",
+                )
+
+            durum_metni = (
+                "ANORMAL / KUSURLU" if skor >= karar_esigi else "NORMAL / KUSURSUZ"
             )
 
-        st.divider()
-        st.subheader("📊 Analiz Sonucu")
-
-        metric_col1, metric_col2, metric_col3 = st.columns(3)
-        metric_col1.metric("Anomali Skoru", f"{skor:.4f}")
-        metric_col2.metric("Karar Eşiği", f"{karar_esigi:.1f}")
-        metric_col3.metric("Analiz Süresi", f"{sure:.3f} saniye")
-
-        if skor >= karar_esigi:
-            st.error(
-                f"🚨 **SONUÇ: ANORMAL / KUSURLU YÜZEY DETEKTEDİ**\n\nAnomali skoru ({skor:.4f}) belirlenen karar eşiğinin ({karar_esigi}) üzerindedir."
+            # Geçmişe Kaydet
+            gecmis_db.kayit_ekle(
+                yuklenen_dosya.name, skor, karar_esigi, durum_metni, sure
             )
-        else:
-            st.success(
-                f"✅ **SONUÇ: NORMAL / KUSURSUZ YÜZEY**\n\nAnomali skoru ({skor:.4f}) karar eşiğinin ({karar_esigi}) altındadır."
+
+            st.divider()
+            if skor >= karar_esigi:
+                st.error(f"🚨 **SONUÇ: {durum_metni}** (Skor: {skor:.4f})")
+            else:
+                st.success(f"✅ **SONUÇ: {durum_metni}** (Skor: {skor:.4f})")
+
+            # PDF Oluşturma ve İndirme
+            pdf_yolu = f"ciktilar/gecici/{dosya_stem}_rapor.pdf"
+            pdf_raporu_olustur(
+                str(gecici_yol),
+                isi_yolu,
+                yuklenen_dosya.name,
+                skor,
+                karar_esigi,
+                durum_metni,
+                cikti_pdf_yolu=pdf_yolu,
             )
+
+            with open(pdf_yolu, "rb") as f:
+                st.download_button(
+                    "📄 PDF Kalite Raporunu İndir",
+                    f,
+                    file_name=f"Kalite_Raporu_{dosya_stem}.pdf",
+                    mime="application/pdf",
+                )
+
+with sekme2:
+    st.subheader("📊 Analiz Geçmişi Dökümü")
+    gecmis_listesi = gecmis_db.gecmisi_getir()
+    if gecmis_listesi:
+        df = pd.DataFrame(gecmis_listesi)
+        st.dataframe(df, use_container_width=True)
+
+        # CSV İndirme
+        csv_data = df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "📥 Tüm Geçmişi CSV Olarak İndir",
+            csv_data,
+            "analiz_gecmisi.csv",
+            "text/csv",
+        )
+    else:
+        st.info("Henüz kaydedilmiş analiz geçmişi bulunmamaktadır.")
