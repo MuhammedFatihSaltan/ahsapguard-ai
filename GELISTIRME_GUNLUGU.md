@@ -16,3 +16,14 @@ Bu belge, proje boyunca tamamlanan aşamaları, çalıştırılan komutları, al
 4. `.venv` Python sanal ortamı kuruldu ve aktif edildi.
 5. Veri setlerinin ve model ağırlıklarının Git'e yüklenmesini engelleyen `.gitignore` yapılandırıldı.
 6. Başlangıç geliştirme günlüğü oluşturuldu.
+
+## [Aşama 1] --- Veri Kümesi Hazırlığı
+
+- **Tarih:** 2026-10-20
+- **Durum:** Tamamlandı
+
+### Yapılan İşlemler
+1. `src/ahsapguard/veri/veri_indir.py` ile MVTec AD `wood` yapısında veri hazırlama altyapısı kuruldu.
+2. `src/ahsapguard/veri/veri_kontrol.py` yazılarak veri kümesi klasör yapısı ve görsel sayıları doğrulandı.
+3. `docs/VERI_KUMESI.md` teknik dokümantasyonu oluşturuldu.
+4. Veri kümesinin test ve doğrulama aşamaları başarıyla tamamlandı.
