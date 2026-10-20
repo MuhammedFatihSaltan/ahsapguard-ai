@@ -49,3 +49,14 @@ Bu belge, proje boyunca tamamlanan aşamaları, çalıştırılan komutları, al
 2. `src/ahsapguard/degerlendirme/degerlendirici.py` yazılarak test seti üzerinde toplu çıkarım ve AUROC hesabı yapıldı.
 3. Görüntü düzeyinde AUROC skoru 1.0000 olarak ölçüldü ve `ciktilar/` dizinine ısı haritaları aktarıldı.
 4. `docs/MODEL_DEGERLENDIRME.md` teknik dokümanı oluşturuldu.
+
+## [Aşama 4] --- Web Uygulaması (Streamlit)
+
+- **Tarih:** 2026-10-20
+- **Durum:** Tamamlandı
+
+### Yapılan İşlemler
+1. Streamlit web çatısı projeye dahil edildi.
+2. `app/arayuz.py` modülü geliştirilerek kullanıcı dostu kalite kontrol arayüzü sunuldu.
+3. Model yükleme süreci `@st.cache_resource` ile optimize edildi.
+4. `docs/KULLANIM_KILAVUZU.md` oluşturuldu.
