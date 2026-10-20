@@ -27,3 +27,14 @@ Bu belge, proje boyunca tamamlanan aşamaları, çalıştırılan komutları, al
 2. `src/ahsapguard/veri/veri_kontrol.py` yazılarak veri kümesi klasör yapısı ve görsel sayıları doğrulandı.
 3. `docs/VERI_KUMESI.md` teknik dokümantasyonu oluşturuldu.
 4. Veri kümesinin test ve doğrulama aşamaları başarıyla tamamlandı.
+
+## [Aşama 2] --- Model Ortamı ve İlk Tahmin
+
+- **Tarih:** 2026-10-20
+- **Durum:** Tamamlandı
+
+### Yapılan İşlemler
+1. PyTorch, torchvision, scikit-learn ve görüntü işleme kütüphaneleri yüklendi.
+2. `src/ahsapguard/goruntu/isleyici.py` modülü ile ImageNet uyumlu görüntü dönüşüm hattı kuruldu.
+3. `src/ahsapguard/model/patchcore.py` modülü ile PatchCore anomali tespit mimarisi yazıldı.
+4. Normal görsel (0.5389) ve kusurlu delik görseli (6.7080) skorları başarıyla elde edildi.
