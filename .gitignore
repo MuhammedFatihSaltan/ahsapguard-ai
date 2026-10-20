@@ -1,0 +1,24 @@
+# Python / Virtualenv
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+build/
+dist/
+
+# Veri kümesi, Model Ağırlıkları ve Çıktılar (Büyük Dosyalar)
+veri/*
+!veri/README.md
+modeller/*
+!modeller/README.md
+ciktilar/*
+!ciktilar/README.md
+
+# IDE ve Sistem Dosyaları
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+.env
